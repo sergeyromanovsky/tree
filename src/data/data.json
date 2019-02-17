@@ -1,0 +1,33 @@
+{
+    "name": "test_task",
+    "defaultCollapsed": true,
+    "children": [
+        {
+            "name": "node_modules",
+            "loading": true,
+            "children": []
+        },
+        {
+            "name": "public",
+            "children": [
+                { "name": "favicon.ico" },
+                { "name": "index.html" },
+                { "name": "manifest.json" }
+            ]
+        },
+        {
+            "name": "src",
+            "children": [
+                {
+                    "name": "components",
+                    "children": [{ "name": "TreeNode", "children": [{ "name": "index.jsx" }] }]
+                },
+                { "name": "data", "children": [{ "name": "data.js" }] },
+                { "name": "helpers", "children": [{ "name": "index.js" }] },
+                { "name": "pages", "children": [{ "name": "index.jsx" }, { "name": "index.scss" }] }
+            ]
+        },
+        { "name": "package.json" },
+        { "name": "yarn.lock" }
+    ]
+}

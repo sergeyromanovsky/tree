@@ -1,8 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import './index.scss';
+import App from './pages';
 import * as serviceWorker from './serviceWorker';
+
+// disable browser event on mouse right click
+window.onload = function() {
+    document.addEventListener(
+        'contextmenu',
+        function(e) {
+            e.preventDefault();
+        },
+        false
+    );
+};
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
