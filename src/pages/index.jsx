@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import style from './index.module.scss';
 
 import TreeNode from '../components/TreeNode';
-import initialData from '../data/data.json';
 import ContextMenu from '../components/ContextMenu';
 import Search from '../components/Search';
 
 import { filterTree, expandFilteredNodes, getElByPath, getParentObj } from '../helpers';
+import Spinner from '../components/Spinner';
 
 const initialContext = {
     x: null,
@@ -19,18 +19,21 @@ class App extends Component {
         super(props);
 
         this.state = {
-            data: initialData,
+            initialData: null,
+            data: null,
             inputVal: '',
             selectedPath: [],
-            ctxMenu: initialContext
+            ctxMenu: initialContext,
+            isFetching: true
         };
         this.ctxMenuRef = React.createRef();
     }
     onChangeSearch = (e) => {
+        const { initialData } = this.state;
         const value = e.target.value.trim();
 
         if (!value) {
-            return this.setState({ data: initialData, inputVal: '' });
+            return this.setState({ data: { ...initialData }, inputVal: '' });
         }
         let filtered = filterTree(initialData, value);
         filtered = expandFilteredNodes(filtered, value);
@@ -110,16 +113,26 @@ class App extends Component {
         this.handleHideCtxMenu();
     };
 
+    componentDidMount = () => {
+        fetch('/api/data', { method: 'GET' })
+            .then((res) => res.json())
+            .then((res) => this.setState({ data: res, isFetching: false, initialData: res }))
+            .catch((e) => console.error(e));
+    };
+
     render() {
         const {
             data,
             inputVal,
-            ctxMenu: { show, x, y }
+            ctxMenu: { show, x, y },
+            isFetching
         } = this.state;
 
         let updData = !Array.isArray(data) ? [data] : data;
 
-        return (
+        return isFetching ? (
+            <Spinner />
+        ) : (
             <section className={style.wrapper} onClick={this.handleClickOutsideCtxMenu}>
                 <Search inputVal={inputVal} change={this.onChangeSearch} />
                 <ul>

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import './style.scss';
 import NodeHeader from './NodeHeader';
 
