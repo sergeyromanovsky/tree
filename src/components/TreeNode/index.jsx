@@ -1,23 +1,14 @@
-import React, { Component, useState } from 'react';
+import React, { useState } from 'react';
 import './style.scss';
 import NodeHeader from './NodeHeader';
 
-class TreeNode extends Component {
-    constructor(props) {
-        super(props);
+const TreeNode = ({ node, isDir, path, onRightClick, changeName }) => {
+    const [collapsed, setCollapsed] = useState(
+        node && (node.collapsed || node.defaultCollapsed) ? true : false
+    );
+    const toggleCollapse = () => setCollapsed((prevCollapsed) => !prevCollapsed);
 
-        const { node } = this.props;
-        this.state = {
-            collapsed: node && (node.collapsed || node.defaultCollapsed) ? true : false
-        };
-    }
-
-    toggleCollapse = (path) => {
-        this.setState(({ collapsed }) => ({ collapsed: !collapsed }));
-    };
-
-    renderChildren = ({ children }) => {
-        const { path, onRightClick, changeName } = this.props;
+    const renderChildren = ({ children }) => {
         if (!Array.isArray(children)) {
             children = children ? [children] : [];
         }
@@ -36,23 +27,19 @@ class TreeNode extends Component {
             </ul>
         );
     };
-    render() {
-        const { node, isDir, path, onRightClick, changeName } = this.props;
-        const { collapsed } = this.state;
-        return (
-            <li>
-                <NodeHeader
-                    click={this.toggleCollapse}
-                    node={node}
-                    isDir={isDir}
-                    path={path}
-                    onRightClick={onRightClick}
-                    changeName={changeName}
-                />
-                {collapsed && this.renderChildren(node)}
-            </li>
-        );
-    }
-}
+    return (
+        <li>
+            <NodeHeader
+                click={toggleCollapse}
+                node={node}
+                isDir={isDir}
+                path={path}
+                onRightClick={onRightClick}
+                changeName={changeName}
+            />
+            {collapsed && renderChildren(node)}
+        </li>
+    );
+};
 
 export default TreeNode;

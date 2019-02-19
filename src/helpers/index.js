@@ -57,3 +57,34 @@ export const getElByPath = (data, path) => {
 };
 
 export const getParentObj = (path) => path.slice(0, path.length - 1);
+
+export const initialContext = {
+    x: null,
+    y: null,
+    show: false
+};
+
+export const initialState = {
+    initialData: null,
+    data: null,
+    inputVal: '',
+    selectedPath: [],
+    ctxMenu: initialContext,
+    isFetching: true
+};
+
+export const debounce = (f, ms) => {
+    let timer = null;
+    return function(...args) {
+        const onComplete = () => {
+            f.apply(this, args);
+            timer = null;
+        };
+
+        if (timer) {
+            clearTimeout(timer);
+        }
+
+        timer = setTimeout(onComplete, ms);
+    };
+};

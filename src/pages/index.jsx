@@ -1,53 +1,52 @@
-import React, { Component } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import style from './index.module.scss';
 
 import TreeNode from '../components/TreeNode';
 import ContextMenu from '../components/ContextMenu';
 import Search from '../components/Search';
 
-import { filterTree, expandFilteredNodes, getElByPath, getParentObj } from '../helpers';
+import {
+    filterTree,
+    expandFilteredNodes,
+    getElByPath,
+    getParentObj,
+    initialState,
+    initialContext,
+    debounce
+} from '../helpers';
 import Spinner from '../components/Spinner';
 
-const initialContext = {
-    x: null,
-    y: null,
-    show: false
-};
+const App = () => {
+    const [state, setState] = useState(initialState);
+    const [inputVal, setValue] = useState('');
+    const [data, setData] = useState(null);
+    const [showLoader, setLoader] = useState(true);
+    const ctxMenuRef = useRef(null);
 
-class App extends Component {
-    constructor(props) {
-        super(props);
+    const { init, filtered } = data;
 
-        this.state = {
-            initialData: null,
-            data: null,
-            inputVal: '',
-            selectedPath: [],
-            ctxMenu: initialContext,
-            isFetching: true
-        };
-        this.ctxMenuRef = React.createRef();
-    }
-    onChangeSearch = (e) => {
-        const { initialData } = this.state;
-        const value = e.target.value.trim();
-
-        if (!value) {
-            return this.setState({ data: { ...initialData }, inputVal: '' });
+    const handleSearch = debounce(() => {
+        // e.persist();
+        const trimValue = inputVal.trim();
+        if (!trimValue) {
+            setData(({ filtered }) => ({ init: { ...initialData }, filtered }));
         }
-        let filtered = filterTree(initialData, value);
-        filtered = expandFilteredNodes(filtered, value);
+        let filtered = filterTree(initialData, inputVal);
+        filtered = expandFilteredNodes(filtered, inputVal);
+        setData((prevState) => ({ ...prevState, filtered }));
+    }, 500);
 
-        this.setState({ data: filtered, inputVal: e.target.value });
+    const inputOnChange = (e) => {
+        setValue(e.target.value);
+        handleSearch();
     };
 
-    handleChangeName = (e, path) => {
+    const handleChangeName = (e, path) => {
         e.preventDefault();
         e.persist();
-        const val = e.target[0].value;
-        const updData = { ...this.state.data };
-        let ref = getElByPath(updData, path);
 
+        const val = e.target[0].value;
+        let ref = getElByPath(updData, path);
         const parentRef = getElByPath(updData, getParentObj(path));
 
         if (!val.trim()) {
@@ -63,26 +62,29 @@ class App extends Component {
             }
             delete ref.type;
         }
-        this.setState({ data: updData });
+        setState((prevState) => ({ ...prevState, data: updData }));
     };
 
-    handleContextMenu = (e, path) => {
+    const handleContextMenu = (e, path) => {
         e.persist();
         const { clientX, clientY } = e;
-        this.setState({ selectedPath: path, ctxMenu: { x: clientX, y: clientY, show: true } });
+        setState((prevState) => ({
+            ...prevState,
+            selectedPath: path,
+            ctxMenu: { x: clientX, y: clientY, show: true }
+        }));
     };
 
-    handleClickOutsideCtxMenu = ({ target }) => {
-        if (this.ctxMenuRef.current && !this.ctxMenuRef.current.contains(target)) {
-            this.handleHideCtxMenu();
+    const handleClickOutsideCtxMenu = ({ target }) => {
+        if (ctxMenuRef.current && !ctxMenuRef.current.contains(target)) {
+            handleHideCtxMenu();
         }
     };
 
-    handleHideCtxMenu = () => this.setState({ ctxMenu: { x: 0, y: 0, show: false } });
+    const handleHideCtxMenu = () =>
+        setState((prevState) => ({ ...prevState, ctxMenu: { x: 0, y: 0, show: false } }));
 
-    handleAddNode = (isDir) => {
-        const { selectedPath } = this.state;
-        const updData = { ...this.state.data };
+    const handleAddNode = (isDir) => {
         // TODO: почему добавляет в массив даже без SetState ?
         let ref = getElByPath(updData, selectedPath);
 
@@ -92,73 +94,64 @@ class App extends Component {
         }
         ref.children.push({ name: '', type: 'rename', children: isDir ? [] : undefined });
 
-        this.setState({ ctxMenu: initialContext, data: updData });
+        setState((prevState) => ({ ...prevState, ctxMenu: initialContext, data: updData }));
     };
 
-    handleRemoveNode = () => {
-        const { selectedPath } = this.state;
-        const updData = { ...this.state.data };
+    const handleRemoveNode = () => {
         let ref = getElByPath(updData, getParentObj(selectedPath));
-
         ref.children.splice(selectedPath[selectedPath.length - 1], 1);
-        this.setState({ data: updData, ctxMenu: initialContext });
+        setState((prevState) => ({ ...prevState, data: updData, ctxMenu: initialContext }));
     };
 
-    handleRename = () => {
-        const { selectedPath } = this.state;
-        const updData = { ...this.state.data };
-
+    const handleRename = () => {
         let ref = getElByPath(updData, selectedPath);
         ref.type = 'rename';
-        this.handleHideCtxMenu();
+        handleHideCtxMenu();
     };
 
-    componentDidMount = () => {
+    useEffect(() => {
         fetch('/api/data', { method: 'GET' })
             .then((res) => res.json())
-            .then((res) => this.setState({ data: res, isFetching: false, initialData: res }))
+            .then((res) => {
+                setLoader(false);
+                setData({ init: res, filtered: res });
+            })
             .catch((e) => console.error(e));
-    };
+    }, []);
 
-    render() {
-        const {
-            data,
-            inputVal,
-            ctxMenu: { show, x, y },
-            isFetching
-        } = this.state;
+    const {
+        ctxMenu: { show, x, y }
+    } = state;
 
-        let updData = !Array.isArray(data) ? [data] : data;
-
-        return isFetching ? (
-            <Spinner />
-        ) : (
-            <section className={style.wrapper} onClick={this.handleClickOutsideCtxMenu}>
-                <Search inputVal={inputVal} change={this.onChangeSearch} />
-                <ul>
-                    {updData.map((item) => (
-                        <TreeNode
-                            key={JSON.stringify(updData)}
-                            node={item}
-                            path={[]}
-                            onRightClick={this.handleContextMenu}
-                            changeName={this.handleChangeName}
-                        />
-                    ))}
-                </ul>
-                {show && (
-                    <ContextMenu
-                        ref={this.ctxMenuRef}
-                        x={x}
-                        y={y}
-                        addNode={this.handleAddNode}
-                        rename={this.handleRename}
-                        removeNode={this.handleRemoveNode}
+    return showLoader ? (
+        <Spinner />
+    ) : (
+        <section className={style.wrapper} onClick={handleClickOutsideCtxMenu}>
+            {/* <Search inputVal={inputVal} change={(e) => onChangeSearch(e.target.value)} /> */}
+            <Search inputVal={inputVal} change={inputOnChange} />
+            <ul>
+                {dataArr.map((item) => (
+                    <TreeNode
+                        key={JSON.stringify(dataArr)}
+                        node={item}
+                        path={[]}
+                        onRightClick={handleContextMenu}
+                        changeName={handleChangeName}
                     />
-                )}
-            </section>
-        );
-    }
-}
+                ))}
+            </ul>
+            {show && (
+                <ContextMenu
+                    ref={ctxMenuRef}
+                    x={x}
+                    y={y}
+                    addNode={handleAddNode}
+                    rename={handleRename}
+                    removeNode={handleRemoveNode}
+                />
+            )}
+        </section>
+    );
+};
 
 export default App;
