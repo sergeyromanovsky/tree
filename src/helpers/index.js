@@ -46,7 +46,7 @@ export const expandFilteredNodes = (node, inpValue, matcher = defaultMatcher) =>
 };
 
 export const getElByPath = (data, path) => {
-    let ref = data;
+    let ref = { ...data };
     let i = 0;
     while (i < path.length) {
         ref = ref.children[path[i]];

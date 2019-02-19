@@ -10,35 +10,52 @@ import {
     expandFilteredNodes,
     getElByPath,
     getParentObj,
-    initialState,
     initialContext,
     debounce
 } from '../helpers';
 import Spinner from '../components/Spinner';
 
+// добавить Parent
+
 const App = () => {
-    const [state, setState] = useState(initialState);
     const [inputVal, setValue] = useState('');
-    const [data, setData] = useState(null);
+    const [data, setData] = useState({ init: [], filtered: [] });
     const [showLoader, setLoader] = useState(true);
+    const [ctxMenuInfo, setCtxMenuInfo] = useState({});
+    const [selectedPath, setSelectedPath] = useState([]);
     const ctxMenuRef = useRef(null);
 
     const { init, filtered } = data;
+    const { show, x, y } = ctxMenuInfo;
 
-    const handleSearch = debounce(() => {
-        // e.persist();
-        const trimValue = inputVal.trim();
-        if (!trimValue) {
-            setData(({ filtered }) => ({ init: { ...initialData }, filtered }));
+    // TODO: add memoize
+
+    function setParent(item, parent) {
+        item.parent = parent;
+        if (item.children) {
+            item.children = item.children.map((i) => setParent(i, item));
         }
-        let filtered = filterTree(initialData, inputVal);
-        filtered = expandFilteredNodes(filtered, inputVal);
-        setData((prevState) => ({ ...prevState, filtered }));
-    }, 500);
+
+        return item;
+    }
+    console.log('rec test', init, setParent(init));
+
+    const handleSearch = debounce((val) => {
+        const trimValue = val.trim();
+        if (!trimValue) {
+            setData({ init, filtered: init });
+            setValue('');
+            return;
+        }
+        let updFiltered = filterTree(init, val);
+        updFiltered = expandFilteredNodes(filtered, val);
+
+        setData((prevState) => ({ ...prevState, filtered: updFiltered }));
+    }, 100);
 
     const inputOnChange = (e) => {
         setValue(e.target.value);
-        handleSearch();
+        handleSearch(e.target.value);
     };
 
     const handleChangeName = (e, path) => {
@@ -46,8 +63,8 @@ const App = () => {
         e.persist();
 
         const val = e.target[0].value;
-        let ref = getElByPath(updData, path);
-        const parentRef = getElByPath(updData, getParentObj(path));
+        let ref = getElByPath(filtered, path);
+        const parentRef = getElByPath(filtered, getParentObj(path));
 
         if (!val.trim()) {
             ref = parentRef;
@@ -55,24 +72,21 @@ const App = () => {
         } else {
             const doesNameExist = parentRef.children.some((node) => node.name === val);
             if (doesNameExist) {
-                // TODO: remove hardcode
+                // TODO: добавить рекурсию на имя
                 ref.name = `${val}(1)`;
             } else {
                 ref.name = val;
             }
             delete ref.type;
         }
-        setState((prevState) => ({ ...prevState, data: updData }));
+        setData({ init, filtered });
     };
 
     const handleContextMenu = (e, path) => {
         e.persist();
         const { clientX, clientY } = e;
-        setState((prevState) => ({
-            ...prevState,
-            selectedPath: path,
-            ctxMenu: { x: clientX, y: clientY, show: true }
-        }));
+        setSelectedPath(path);
+        setCtxMenuInfo({ x: clientX, y: clientY, show: true });
     };
 
     const handleClickOutsideCtxMenu = ({ target }) => {
@@ -81,30 +95,30 @@ const App = () => {
         }
     };
 
-    const handleHideCtxMenu = () =>
-        setState((prevState) => ({ ...prevState, ctxMenu: { x: 0, y: 0, show: false } }));
+    const handleHideCtxMenu = () => setCtxMenuInfo({ x: 0, y: 0, show: false });
 
     const handleAddNode = (isDir) => {
-        // TODO: почему добавляет в массив даже без SetState ?
-        let ref = getElByPath(updData, selectedPath);
+        let ref = getElByPath(filtered, selectedPath);
 
         if (!ref.children) {
             // if no children, ref = clicked item parent
-            ref = getElByPath(updData, getParentObj(selectedPath));
+            ref = getElByPath(filtered, getParentObj(selectedPath));
         }
         ref.children.push({ name: '', type: 'rename', children: isDir ? [] : undefined });
 
-        setState((prevState) => ({ ...prevState, ctxMenu: initialContext, data: updData }));
+        setData({ init, filtered });
+        setCtxMenuInfo(initialContext);
     };
 
     const handleRemoveNode = () => {
-        let ref = getElByPath(updData, getParentObj(selectedPath));
+        let ref = getElByPath(filtered, getParentObj(selectedPath));
         ref.children.splice(selectedPath[selectedPath.length - 1], 1);
-        setState((prevState) => ({ ...prevState, data: updData, ctxMenu: initialContext }));
+        setData({ init, filtered });
+        setCtxMenuInfo(initialContext);
     };
 
     const handleRename = () => {
-        let ref = getElByPath(updData, selectedPath);
+        let ref = getElByPath(filtered, selectedPath);
         ref.type = 'rename';
         handleHideCtxMenu();
     };
@@ -119,20 +133,18 @@ const App = () => {
             .catch((e) => console.error(e));
     }, []);
 
-    const {
-        ctxMenu: { show, x, y }
-    } = state;
+    const updFiltered = Array.isArray(filtered) ? filtered : [filtered];
 
     return showLoader ? (
         <Spinner />
     ) : (
         <section className={style.wrapper} onClick={handleClickOutsideCtxMenu}>
-            {/* <Search inputVal={inputVal} change={(e) => onChangeSearch(e.target.value)} /> */}
             <Search inputVal={inputVal} change={inputOnChange} />
             <ul>
-                {dataArr.map((item) => (
+                {console.log(updFiltered)}
+                {updFiltered.map((item) => (
                     <TreeNode
-                        key={JSON.stringify(dataArr)}
+                        key={updFiltered}
                         node={item}
                         path={[]}
                         onRightClick={handleContextMenu}
