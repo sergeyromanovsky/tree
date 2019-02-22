@@ -1,6 +1,28 @@
 .wrapper {
-    width: 300px;
-    height: 120px;
-    background-color: lightblue;
+    display: flex;
+    align-items: center;
+    width: 14vh;
+    height: 15vh;
     position: absolute;
+    background: #252d46;
+    border: 1px solid #1c2132;
+    box-sizing: border-box;
+    box-shadow: 0px 5px 20px rgba(21, 27, 45, 0.5);
+    border-radius: 4px;
+    font-size: 2vh;
+    color: #fff;
+    ul {
+        li {
+            padding-inline-start: 1.5vh;
+            margin-bottom: 0.5vh;
+            transition: all 0.2s;
+            cursor: pointer;
+            &:last-child {
+                margin-bottom: 0;
+            }
+            &:hover {
+                color: var(--blue);
+            }
+        }
+    }
 }

@@ -269,7 +269,7 @@ module.exports = function(webpackEnv) {
                 // First, run the linter.
                 // It's important to do this before Babel processes the JS.
                 {
-                    test: /\.(js|mjs|jsx)$/,
+                    test: /\.(js|mjs|jsx|tsx)$/,
                     enforce: 'pre',
                     use: [
                         {
@@ -298,6 +298,7 @@ module.exports = function(webpackEnv) {
                                 name: 'static/media/[name].[hash:8].[ext]'
                             }
                         },
+
                         // Process application JS with Babel.
                         // The preset includes JSX, Flow, TypeScript, and some ESnext features.
                         {
@@ -422,6 +423,11 @@ module.exports = function(webpackEnv) {
                                 },
                                 'sass-loader'
                             )
+                        },
+                        {
+                            test: /.svg$/,
+                            issuer: /\.(js|mjs|jsx|ts|tsx)$/,
+                            use: ['@svgr/webpack']
                         },
                         // "file" loader makes sure those assets get served by WebpackDevServer.
                         // When you `import` an asset, you get its (virtual) filename.

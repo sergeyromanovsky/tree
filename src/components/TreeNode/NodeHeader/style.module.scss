@@ -1,0 +1,32 @@
+:global {
+    .dir {
+        color: var(--blue);
+    }
+    .file {
+        color: #ffffff;
+    }
+}
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1vh;
+    svg {
+        margin-right: 1vh;
+    }
+    span {
+        font-size: 2vh;
+    }
+}
+
+.form {
+    input {
+        width: 18rem;
+        height: 3rem;
+        background: #252d46;
+        border: 1px solid #52586f;
+        color: #fff;
+        font-size: 2vh;
+        padding-left: 1vh;
+    }
+}

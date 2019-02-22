@@ -1,13 +1,13 @@
 import React from 'react';
+import style from './style.module.scss';
+
+import Icon from '../../assets/search.svg';
 
 const Search = ({ inputVal, change }) => {
     return (
-        <div>
-            {/* <span className="input-group-addon">
-                        <i className="fa fa-search" />
-                    </span> */}
+        <div className={style.wrapper}>
+            <Icon width="2vh" height="2vh" viewBox="0 0 20 20" />
             <input
-                // className="form-control"
                 onChange={change}
                 placeholder="Search the tree..."
                 type="text"

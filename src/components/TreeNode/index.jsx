@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import './style.scss';
+import React, { useState, useEffect } from 'react';
+import style from './style.module.scss';
 import NodeHeader from './NodeHeader';
 
 const TreeNode = ({ node, isDir, path, onRightClick, changeName }) => {
     const [collapsed, setCollapsed] = useState(
         node && (node.collapsed || node.defaultCollapsed) ? true : false
     );
+
+    useEffect(() => {
+        setCollapsed(collapsed);
+    }, [collapsed]);
     const toggleCollapse = () => setCollapsed((prevCollapsed) => !prevCollapsed);
 
     const renderChildren = ({ children }) => {
@@ -13,7 +17,7 @@ const TreeNode = ({ node, isDir, path, onRightClick, changeName }) => {
             children = children ? [children] : [];
         }
         return (
-            <ul>
+            <ul className={style.list}>
                 {children.map((child, index) => (
                     <TreeNode
                         key={child.name}

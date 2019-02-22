@@ -1,3 +1,12 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --blue: #799fff;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -7,6 +16,16 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    font-size: 1vh;
+}
+
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+ul {
+    li {
+        list-style: none;
+    }
 }

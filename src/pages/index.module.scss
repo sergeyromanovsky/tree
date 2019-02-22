@@ -1,9 +1,11 @@
-span {
-    color: green;
-    text-align: center;
+:global body {
+    font-family: 'Roboto';
 }
 
 .wrapper {
     height: 100vh;
     width: 100vw;
+    padding-top: 15vh;
+    padding-left: 15vh;
+    background-color: #1c2132;
 }

@@ -15,8 +15,6 @@ import {
 } from '../helpers';
 import Spinner from '../components/Spinner';
 
-// добавить Parent
-
 const App = () => {
     const [inputVal, setValue] = useState('');
     const [data, setData] = useState({ init: [], filtered: [] });
@@ -28,17 +26,15 @@ const App = () => {
     const { init, filtered } = data;
     const { show, x, y } = ctxMenuInfo;
 
-    // TODO: add memoize
-
-    function setParent(item, parent) {
-        item.parent = parent;
-        if (item.children) {
-            item.children = item.children.map((i) => setParent(i, item));
-        }
-
-        return item;
-    }
-    console.log('rec test', init, setParent(init));
+    useEffect(() => {
+        fetch('/api/data', { method: 'GET' })
+            .then((res) => res.json())
+            .then((res) => {
+                setLoader(false);
+                setData({ init: res, filtered: res });
+            })
+            .catch((e) => console.error(e));
+    }, []);
 
     const handleSearch = debounce((val) => {
         const trimValue = val.trim();
@@ -72,11 +68,15 @@ const App = () => {
         } else {
             const doesNameExist = parentRef.children.some((node) => node.name === val);
             if (doesNameExist) {
-                // TODO: добавить рекурсию на имя
-                ref.name = `${val}(1)`;
+                let counter = 1;
+                while (parentRef.children.some((i) => i.name === `${val}(${counter})`)) {
+                    counter++;
+                }
+                ref.name = `${val}(${counter})`;
             } else {
                 ref.name = val;
             }
+
             delete ref.type;
         }
         setData({ init, filtered });
@@ -123,16 +123,6 @@ const App = () => {
         handleHideCtxMenu();
     };
 
-    useEffect(() => {
-        fetch('/api/data', { method: 'GET' })
-            .then((res) => res.json())
-            .then((res) => {
-                setLoader(false);
-                setData({ init: res, filtered: res });
-            })
-            .catch((e) => console.error(e));
-    }, []);
-
     const updFiltered = Array.isArray(filtered) ? filtered : [filtered];
 
     return showLoader ? (
@@ -141,10 +131,10 @@ const App = () => {
         <section className={style.wrapper} onClick={handleClickOutsideCtxMenu}>
             <Search inputVal={inputVal} change={inputOnChange} />
             <ul>
-                {console.log(updFiltered)}
                 {updFiltered.map((item) => (
                     <TreeNode
-                        key={updFiltered}
+                        key={JSON.stringify(updFiltered)}
+                        isDir={!!item.children}
                         node={item}
                         path={[]}
                         onRightClick={handleContextMenu}

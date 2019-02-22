@@ -3,6 +3,18 @@
     "defaultCollapsed": true,
     "children": [
         {
+            "name": "config",
+            "children": [
+                {
+                    "name": "jest",
+                    "children": [{ "name": "cssTransform.js" }, { "name": "fileTransform.js" }]
+                },
+                { "name": "env.js" },
+                { "name": "paths.js" },
+                { "name": "webpack.config.js" }
+            ]
+        },
+        {
             "name": "node_modules",
             "loading": true,
             "children": []
@@ -16,18 +28,70 @@
             ]
         },
         {
-            "name": "src",
+            "name": "scripts",
+            "children": [{ "name": "build.js" }, { "name": "start.js" }, { "name": "test.js" }]
+        },
+        {
+            "name": "server",
             "children": [
-                {
-                    "name": "components",
-                    "children": [{ "name": "TreeNode", "children": [{ "name": "index.jsx" }] }]
-                },
-                { "name": "data", "children": [{ "name": "data.js" }] },
-                { "name": "helpers", "children": [{ "name": "index.js" }] },
-                { "name": "pages", "children": [{ "name": "index.jsx" }, { "name": "index.scss" }] }
+                { "name": "controller", "children": [{ "name": "index.js" }] },
+                { "name": "data", "children": [{ "name": "index.json" }] },
+                { "name": "index.js" }
             ]
         },
+        {
+            "name": "src",
+            "children": [
+                { "name": "file.svg" },
+                { "name": "folder.svg" },
+                { "name": "search.svg" },
+                {
+                    "name": "components",
+                    "children": [
+                        {
+                            "name": "ContextMenu",
+                            "children": [{ "name": "index.jsx" }, { "name": "style.module.scss" }]
+                        },
+                        {
+                            "name": "Search",
+                            "children": [{ "name": "index.jsx" }, { "name": "style.module.scss" }]
+                        },
+                        {
+                            "name": "Spinner",
+                            "children": [{ "name": "index.jsx" }, { "name": "style.module.scss" }]
+                        },
+                        {
+                            "name": "TreeNode",
+                            "children": [
+                                {
+                                    "name": "NodeHeader",
+                                    "children": [
+                                        { "name": "index.jsx" },
+                                        { "name": "style.module.scss" }
+                                    ]
+                                },
+                                { "name": "index.jsx" },
+                                { "name": "style.module.scss" }
+                            ]
+                        }
+                    ]
+                },
+                { "name": "helpers", "children": [{ "name": "index.js" }] },
+                {
+                    "name": "pages",
+                    "children": [
+                        { "name": "index.jsx" },
+                        { "name": "index.module.scss" },
+                        { "name": "index.spec.js" }
+                    ]
+                },
+                { "name": "index.js" },
+                { "name": "index.scss" }
+            ]
+        },
+        { "name": ".gitignore" },
         { "name": "package.json" },
+        { "name": "readme.md" },
         { "name": "yarn.lock" }
     ]
 }
