@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import style from './style.module.scss';
 import NodeHeader from './NodeHeader';
 
@@ -12,7 +12,8 @@ const TreeNode = ({ node, isDir, path, onRightClick, changeName }) => {
     }, [collapsed]);
     const toggleCollapse = () => setCollapsed((prevCollapsed) => !prevCollapsed);
 
-    const renderChildren = ({ children }) => {
+    const renderChildren = useMemo(() => {
+        let { children } = node;
         if (!Array.isArray(children)) {
             children = children ? [children] : [];
         }
@@ -30,7 +31,7 @@ const TreeNode = ({ node, isDir, path, onRightClick, changeName }) => {
                 ))}
             </ul>
         );
-    };
+    }, [node]);
     return (
         <li>
             <NodeHeader
@@ -41,7 +42,7 @@ const TreeNode = ({ node, isDir, path, onRightClick, changeName }) => {
                 onRightClick={onRightClick}
                 changeName={changeName}
             />
-            {collapsed && renderChildren(node)}
+            {collapsed && renderChildren}
         </li>
     );
 };

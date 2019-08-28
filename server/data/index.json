@@ -17,7 +17,7 @@
         {
             "name": "node_modules",
             "loading": true,
-            "children": []
+            "children": [{ "name": "react" }]
         },
         {
             "name": "public",
